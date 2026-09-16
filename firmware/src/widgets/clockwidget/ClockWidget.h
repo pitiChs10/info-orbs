@@ -83,6 +83,7 @@ public:
     void draw(bool force = false) override;
     void buttonPressed(uint8_t buttonId, ButtonState state) override;
     String getName() override;
+    bool setColorPreset(uint8_t preset) override;
 
 private:
     void change24hMode();
@@ -97,6 +98,8 @@ private:
     void changeClockType();
 
     ClockType m_type = DEFAULT_CLOCK;
+    uint16_t m_digitColor = CLOCK_COLOR;
+    uint16_t m_shadowColor = CLOCK_SHADOW_COLOR;
 
     time_t m_unixEpoch;
     int m_timeZoneOffset;

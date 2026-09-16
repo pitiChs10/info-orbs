@@ -14,6 +14,8 @@ public:
     virtual void draw(bool force = false) = 0;
     virtual void buttonPressed(uint8_t buttonId, ButtonState state) = 0;
     virtual String getName() = 0;
+    // Return false for widgets or display modes that do not support color presets.
+    virtual bool setColorPreset(uint8_t preset) { return false; }
     void setBusy(bool busy);
 
 protected:

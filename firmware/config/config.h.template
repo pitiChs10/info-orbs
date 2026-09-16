@@ -9,6 +9,17 @@
 #define WIDGET_CYCLE_DELAY 0                      // Automatically cycle widgets every X seconds, set to 0 to disable
 #define LOCALE EN                                 // Language selection for Month and Weekday - possible values are EN, DE, FR
 
+// IR REMOTE (KY-022: VCC=3V3, GND=GND, S=GPIO22)
+#define IR_REMOTE_ENABLED 1 // Set to 0 to disable IR reception
+#define IR_REMOTE_PIN 22
+#define IR_REMOTE_ADDRESS 0x00 // NEC remote address
+// Commands: Left=0x44, Right=0x43, OK=0x40. Repeat frames are ignored.
+
+// MATRIX WIDGET
+#define INCLUDE_MATRIX_WIDGET 1
+#define MATRIX_TEXT_COLOR 0x001F // Blue trail
+#define MATRIX_HEAD_COLOR 0x07FF // Cyan leading character
+
 // NIGHTTIME DIMMING
 //#define DIM_START_HOUR 22  // Dim the screens at this time (24h format)
 //#define DIM_END_HOUR 7     // Undim the screens at this time (24h format)

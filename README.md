@@ -6,6 +6,8 @@ Info Orbs is an open source display widget built on top of the ESP32 platform. T
 **Version 1.1 of the firmware is here, you can find the new features outlined below. If you're coming from Youtube, the software flashing instructions have changed slightly, *please refer to *[the NEW FLASHING INSTRUCTIONS](references/Firmware%20Install%20Guide.md)* to ensure you get up and running smoothly.***
 
 Quick Links: [Get A Dev Kit Here](https://brett.tech/collections/electronics-projects/products/info-orbs-full-dev-kit) | [Discord](https://link.brett.tech/discord) | [Youtube Assembly/Flashing Video](https://link.brett.tech/orbsYT)
+IR remote control: [Wiring, Serial Monitor and button-code configuration](references/IR%20Remote.md)
+
 <p>
     <img src="references/weather.png" alt="Weather Widget" style="width:30%;">
     <img src="references/time.png" alt="Clock Widget" style="width: 30%;">

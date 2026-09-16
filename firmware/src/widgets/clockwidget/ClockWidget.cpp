@@ -16,35 +16,37 @@ void ClockWidget::setup() {
 }
 
 void ClockWidget::draw(bool force) {
+    const uint16_t digitColor = m_type == ClockType::NORMAL ? m_digitColor : CLOCK_COLOR;
+    const uint16_t shadowColor = m_type == ClockType::NORMAL ? m_shadowColor : CLOCK_SHADOW_COLOR;
     m_manager.setFont(CLOCK_FONT);
     GlobalTime *time = GlobalTime::getInstance();
 
     if (m_lastDisplay1Digit != m_display1Digit || force) {
-        displayDigit(0, m_lastDisplay1Digit, m_display1Digit, CLOCK_COLOR);
+        displayDigit(0, m_lastDisplay1Digit, m_display1Digit, digitColor);
         m_lastDisplay1Digit = m_display1Digit;
     }
     if (m_lastDisplay2Digit != m_display2Digit || force) {
-        displayDigit(1, m_lastDisplay2Digit, m_display2Digit, CLOCK_COLOR);
+        displayDigit(1, m_lastDisplay2Digit, m_display2Digit, digitColor);
         m_lastDisplay2Digit = m_display2Digit;
     }
     if (m_lastDisplay4Digit != m_display4Digit || force) {
-        displayDigit(3, m_lastDisplay4Digit, m_display4Digit, CLOCK_COLOR);
+        displayDigit(3, m_lastDisplay4Digit, m_display4Digit, digitColor);
         m_lastDisplay4Digit = m_display4Digit;
     }
     if (m_lastDisplay5Digit != m_display5Digit || force) {
-        displayDigit(4, m_lastDisplay5Digit, m_display5Digit, CLOCK_COLOR);
+        displayDigit(4, m_lastDisplay5Digit, m_display5Digit, digitColor);
         m_lastDisplay5Digit = m_display5Digit;
     }
 
     if (m_secondSingle != m_lastSecondSingle || force) {
         if (m_secondSingle % 2 == 0) {
-            displayDigit(2, "", ":", CLOCK_COLOR, false);
+            displayDigit(2, "", ":", digitColor, false);
         } else {
-            displayDigit(2, "", ":", CLOCK_SHADOW_COLOR, false);
+            displayDigit(2, "", ":", shadowColor, false);
         }
 #if SHOW_SECOND_TICKS == true
         displaySeconds(2, m_lastSecondSingle, TFT_BLACK);
-        displaySeconds(2, m_secondSingle, CLOCK_COLOR);
+        displaySeconds(2, m_secondSingle, digitColor);
 #endif
         m_lastSecondSingle = m_secondSingle;
         if (!FORMAT_24_HOUR && SHOW_AM_PM_INDICATOR && m_type != ClockType::NIXIE) {
@@ -53,7 +55,7 @@ void ClockWidget::draw(bool force) {
                 displayAmPm(m_lastAmPm, TFT_BLACK);
                 m_lastAmPm = m_amPm;
             }
-            displayAmPm(m_amPm, CLOCK_COLOR);
+            displayAmPm(m_amPm, digitColor);
         }
     }
 }
@@ -143,6 +145,25 @@ void ClockWidget::changeClockType() {
     draw(true);
 }
 
+bool ClockWidget::setColorPreset(uint8_t preset) {
+    // Image-based clocks must not be recolored or redrawn by number keys.
+    if (m_type != ClockType::NORMAL || preset > 9) {
+        return false;
+    }
+    static const uint16_t colors[] = {
+        CLOCK_COLOR, 0x07E0, 0xF800, 0x001F, 0x07FF,
+        0x8010, 0xFFE0, 0xFD20, 0xFC18, 0xFFFF
+    };
+    m_digitColor = colors[preset];
+    // Dim the same hue to 1/8 brightness for inactive digit segments.
+    m_shadowColor = preset == 0 ? CLOCK_SHADOW_COLOR :
+        ((((m_digitColor >> 11) & 0x1F) / 8) << 11) |
+        ((((m_digitColor >> 5) & 0x3F) / 8) << 5) |
+        ((m_digitColor & 0x1F) / 8);
+    m_manager.clearAllScreens();
+    draw(true);
+    return true;
+}
 void ClockWidget::buttonPressed(uint8_t buttonId, ButtonState state) {
     if (buttonId == BUTTON_OK && state == BTN_SHORT) {
         changeClockType();
@@ -182,7 +203,7 @@ void ClockWidget::displayDigit(int displayIndex, const String &lastDigit, const 
         DigitOffset lastDigitOffset = getOffsetForDigit(lastDigit);
         m_manager.selectScreen(displayIndex);
         if (shadowing) {
-            m_manager.setFontColor(CLOCK_SHADOW_COLOR, TFT_BLACK);
+            m_manager.setFontColor(m_shadowColor, TFT_BLACK);
             if (CLOCK_FONT == DSEG14) {
                 // DSEG14 (from DSEGstended) uses # to fill all segments
                 m_manager.drawString("#", defaultX, defaultY, fontSize, Align::MiddleCenter);

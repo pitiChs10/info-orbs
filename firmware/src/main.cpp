@@ -1,4 +1,5 @@
 #include "Button.h"
+#include "IRRemote.h"
 #include "GlobalTime.h"
 #include "ScreenManager.h"
 #include "Utils.h"
@@ -10,6 +11,13 @@
 #include "webdatawidget/WebDataWidget.h"
 #include "wifiwidget/WifiWidget.h"
 #include <Arduino.h>
+
+#ifndef INCLUDE_MATRIX_WIDGET
+#define INCLUDE_MATRIX_WIDGET 1
+#endif
+#if INCLUDE_MATRIX_WIDGET
+#include "matrixwidget/MatrixWidget.h"
+#endif
 
 #ifdef STOCK_TICKER_LIST
     #include "stockwidget/StockWidget.h"
@@ -140,6 +148,10 @@ void setup() {
 #endif
 
     m_widgetCycleDelayPrev = millis();
+#if INCLUDE_MATRIX_WIDGET
+    widgetSet->add(new MatrixWidget(*sm));
+#endif
+    setupRemote();
 }
 
 void checkCycleWidgets() {
@@ -183,7 +195,42 @@ void checkButtons() {
     }
 }
 
+void checkRemote(bool widgetsReady) {
+    const RemoteAction action = readRemote();
+    // Drain received frames while Wi-Fi/data setup is active; don't queue UI actions.
+    if (!widgetsReady || action == RemoteAction::None) {
+        return;
+    }
+    if (action >= RemoteAction::Digit0 && action <= RemoteAction::Digit9) {
+        const uint8_t preset = static_cast<uint8_t>(action) - static_cast<uint8_t>(RemoteAction::Digit0);
+        if (widgetSet->getCurrent()->setColorPreset(preset)) {
+            m_widgetCycleDelayPrev = millis();
+            Serial.printf("IR digit %u -> color preset\n", preset);
+        } else {
+            Serial.println("IR color preset ignored for this widget/display mode");
+        }
+        return;
+    }
+    m_widgetCycleDelayPrev = millis();
+    switch (action) {
+        case RemoteAction::Previous:
+            Serial.println("IR Left -> previous widget");
+            widgetSet->prev();
+            break;
+        case RemoteAction::Next:
+            Serial.println("IR Right -> next widget");
+            widgetSet->next();
+            break;
+        case RemoteAction::OK:
+            Serial.println("IR OK -> middle button short press");
+            widgetSet->buttonPressed(BUTTON_OK, BTN_SHORT);
+            break;
+        default: break;
+    }
+}
+
 void loop() {
+    checkRemote(wifiWidget->isConnected() && widgetSet->initialUpdateDone());
     if (wifiWidget->isConnected() == false) {
         wifiWidget->update();
         wifiWidget->draw();
