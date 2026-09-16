@@ -18,6 +18,7 @@
   },
   "extensions": {
     "recommendations": [
+      "platformio.platformio-ide",
       "vsciot-vscode.vscode-arduino",
       "ms-vscode.cpptools",
       "ms-vscode.vscode-serial-monitor",

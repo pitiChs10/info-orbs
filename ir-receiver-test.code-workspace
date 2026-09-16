@@ -1,0 +1,11 @@
+{
+  "folders": [
+    {
+      "name": "KY-022 IR receiver test",
+      "path": "diagnostics/ir-receiver"
+    }
+  ],
+  "extensions": {
+    "recommendations": ["platformio.platformio-ide"]
+  }
+}

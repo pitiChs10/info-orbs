@@ -4,6 +4,8 @@ Info Orbs is an open source display widget built on top of the ESP32 platform. T
 
 **Version 1.1 of the firmware is here, you can find the new features outlined below. If you're coming from Youtube, the software flashing instructions have changed slightly, _please refer to _[the NEW FLASHING INSTRUCTIONS](references/Firmware%20Install%20Guide.md)_ to ensure you get up and running smoothly._**
 
+Combined project: [Custom images + IR setup](references/Combined%20Project.md) | [IR wiring and button mapping](references/IR%20Remote.md)
+
 Quick Links: [Get A Dev Kit Here](https://brett.tech/collections/electronics-projects/products/info-orbs-full-dev-kit) | [Discord](https://link.brett.tech/discord) | [Youtube Assembly/Flashing Video](https://link.brett.tech/orbsYT)
 
 <p>

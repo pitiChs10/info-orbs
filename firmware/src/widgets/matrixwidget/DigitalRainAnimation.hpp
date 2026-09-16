@@ -44,6 +44,7 @@ public:
         line_speed_min = new_line_speed_min;
         line_speed_max = new_line_speed_max;
         matrixTimeFrame = matrix_timeFrame;
+        timeFrame = matrix_timeFrame;
         prepareAnim();
     }
 
@@ -80,7 +81,7 @@ public:
     }
 
     // updating screen
-    void loop() {
+    void loop(bool force = false) {
         if (_gfx == NULL)
             return;
 
@@ -89,7 +90,7 @@ public:
             resetKey();
         }
 
-        if (((currentTime - lastDrawTime) < timeFrame)) {
+        if (!force && ((currentTime - lastDrawTime) < timeFrame)) {
             return;
         }
 
@@ -120,7 +121,7 @@ public:
     }
 
 private:
-    ScreenManager *_gfx;
+    ScreenManager *_gfx = nullptr;
     //  T* _gfx = NULL;
     AnimMode _animMode;
     int line_len_min; // minimum length of characters
@@ -168,6 +169,9 @@ private:
         _gfx->fillRect(0, 0, width, height, bgColor);
         _gfx->setTextColor(textColor, bgColor);
         numOfline = width / lineWidth + 1;
+        line_length.clear();
+        line_pos.clear();
+        line_speed.clear();
 
         for (int i = 0; i < numOfline; i++) {
             line_length.push_back(getRandomNum(line_len_min, line_len_max));
@@ -209,7 +213,7 @@ private:
 
         if (keyString.length() > lineNum) {
             char _char = keyString.at(lineNum);
-            const char *keyChar = &_char;
+            const String keyChar(_char);
             _gfx->setCursor(startX, line_pos[lineNum] + currentY);
             _gfx->setTextSize(fontSize);
             _gfx->print(keyChar);

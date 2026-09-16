@@ -18,6 +18,7 @@ public:
     virtual void draw(bool force = false) = 0;
     virtual void buttonPressed(uint8_t buttonId, ButtonState state) = 0;
     virtual String getName() = 0;
+    virtual bool setColorPreset(uint8_t preset) { return false; }
 
     WidgetTimer &addDrawRefreshFrequency(TimeFrequency frequency);
     WidgetTimer &addUpdateRefreshFrequency(TimeFrequency frequency);

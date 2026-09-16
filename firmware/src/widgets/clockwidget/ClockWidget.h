@@ -87,9 +87,13 @@ public:
     void draw(bool force = false) override;
     void buttonPressed(uint8_t buttonId, ButtonState state) override;
     String getName() override;
+    bool setColorPreset(uint8_t preset) override;
 
 private:
     void addConfigToManager();
+    uint16_t normalDigitColor() const;
+    uint16_t normalShadowColor() const;
+    int m_remotePreset = 0;
     void changeFormat();
     void displayDigit(int displayIndex, const String &lastDigit, const String &digit, uint32_t color, bool shadowing);
     void displayDigit(int displayIndex, const String &lastDigit, const String &digit, uint32_t color);

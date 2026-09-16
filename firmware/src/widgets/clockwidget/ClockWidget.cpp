@@ -68,38 +68,40 @@ void ClockWidget::setup() {
 }
 
 void ClockWidget::draw(bool force) {
+    const uint16_t digitColor = m_type == (int) ClockType::NORMAL ? normalDigitColor() : m_fgColor;
+    const uint16_t shadowColor = m_type == (int) ClockType::NORMAL ? normalShadowColor() : m_shadowColor;
     m_manager.setFont(CLOCK_FONT);
     GlobalTime *time = GlobalTime::getInstance();
 
     if (m_lastDisplay1Digit != m_display1Digit || force) {
-        displayDigit(0, m_lastDisplay1Digit, m_display1Digit, m_fgColor);
+        displayDigit(0, m_lastDisplay1Digit, m_display1Digit, digitColor);
         m_lastDisplay1Digit = m_display1Digit;
     }
     if (m_lastDisplay2Digit != m_display2Digit || force) {
-        displayDigit(1, m_lastDisplay2Digit, m_display2Digit, m_fgColor);
+        displayDigit(1, m_lastDisplay2Digit, m_display2Digit, digitColor);
         m_lastDisplay2Digit = m_display2Digit;
     }
     if (m_lastDisplay4Digit != m_display4Digit || force) {
-        displayDigit(3, m_lastDisplay4Digit, m_display4Digit, m_fgColor);
+        displayDigit(3, m_lastDisplay4Digit, m_display4Digit, digitColor);
         m_lastDisplay4Digit = m_display4Digit;
     }
     if (m_lastDisplay5Digit != m_display5Digit || force) {
-        displayDigit(4, m_lastDisplay5Digit, m_display5Digit, m_fgColor);
+        displayDigit(4, m_lastDisplay5Digit, m_display5Digit, digitColor);
         m_lastDisplay5Digit = m_display5Digit;
     }
 
     if (m_secondSingle != m_lastSecondSingle || force) {
         if (m_secondSingle % 2 == 0) {
-            displayDigit(2, "", ":", m_fgColor, false);
+            displayDigit(2, "", ":", digitColor, false);
         } else {
-            displayDigit(2, "", ":", m_shadowColor, false);
+            displayDigit(2, "", ":", shadowColor, false);
         }
         if (m_showSecondTicks) {
             if (!isCustomClock(m_type)) {
                 // not a custom clock -> clear background
                 displaySeconds(2, m_lastSecondSingle, TFT_BLACK);
             }
-            displaySeconds(2, m_secondSingle, m_fgColor);
+            displaySeconds(2, m_secondSingle, digitColor);
         }
         m_lastSecondSingle = m_secondSingle;
         if (m_type == (int) ClockType::NORMAL) {
@@ -109,7 +111,7 @@ void ClockWidget::draw(bool force) {
                     displayAmPm(m_lastAmPm, TFT_BLACK);
                     m_lastAmPm = m_amPm;
                 }
-                displayAmPm(m_amPm, m_fgColor);
+                displayAmPm(m_amPm, digitColor);
             }
         }
     }
@@ -214,6 +216,25 @@ void ClockWidget::changeClockType() {
     }
 }
 
+uint16_t ClockWidget::normalDigitColor() const {
+    static const uint16_t colors[] = {0, 0x07E0, 0xF800, 0x001F, 0x07FF, 0x8010, 0xFFE0, 0xFD20, 0xFC18, 0xFFFF};
+    return m_remotePreset == 0 ? m_fgColor : colors[m_remotePreset];
+}
+
+uint16_t ClockWidget::normalShadowColor() const {
+    if (m_remotePreset == 0) return m_shadowColor;
+    const uint16_t color = normalDigitColor();
+    return ((((color >> 11) & 31) / 8) << 11) | ((((color >> 5) & 63) / 8) << 5) | ((color & 31) / 8);
+}
+
+bool ClockWidget::setColorPreset(uint8_t preset) {
+    if (m_type != (int) ClockType::NORMAL || preset > 9) return false;
+    m_remotePreset = preset;
+    m_manager.clearAllScreens();
+    draw(true);
+    return true;
+}
+
 void ClockWidget::buttonPressed(uint8_t buttonId, ButtonState state) {
     if (buttonId == BUTTON_OK && state == BTN_SHORT) {
         changeClockType();
@@ -254,7 +275,7 @@ void ClockWidget::displayDigit(int displayIndex, const String &lastDigit, const 
         DigitOffset lastDigitOffset = getOffsetForDigit(lastDigit);
         m_manager.selectScreen(displayIndex);
         if (shadowing) {
-            m_manager.setFontColor(m_shadowColor, TFT_BLACK);
+            m_manager.setFontColor(normalShadowColor(), TFT_BLACK);
             if (CLOCK_FONT == DSEG14) {
                 // DSEG14 (from DSEGstended) uses # to fill all segments
                 m_manager.drawString("#", defaultX, defaultY, fontSize, Align::MiddleCenter);

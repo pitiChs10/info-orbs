@@ -14,9 +14,12 @@ public:
     void draw(bool force) override;
     void buttonPressed(uint8_t buttonId, ButtonState state) override;
     String getName() override;
+    bool setColorPreset(uint8_t preset) override;
 
 private:
-    DigitalRainAnimation matrix_effect;
+    void applyColors();
+    int m_remotePreset = 0;
+    DigitalRainAnimation matrix_effect{};
 
     bool m_bigFont = false;
     int m_textColor = 0x001F;

@@ -15,28 +15,31 @@ MatrixWidget::MatrixWidget(ScreenManager &manager, ConfigManager &config) : Widg
 }
 
 void MatrixWidget::setup() {
-    int R;
-    int G;
-    int B;
-
-    ConfigManager *cm = ConfigManager::getInstance();
-    bool l_bigFont = cm->getConfigBool("mtxBigFont", false);
-    if (l_bigFont)
-        matrix_effect.init(&m_manager, true, false);
-    else
-        matrix_effect.init(&m_manager);
-
+    m_manager.selectAllScreens();
+    matrix_effect.init(&m_manager, m_bigFont, false);
     matrix_effect.setup(m_lineMin, m_lineMax, m_speedMin, m_speedMax, m_updateInterval);
+    applyColors();
+    m_manager.reset();
+}
 
-    R = ((m_textColor >> 11) & 0x1F) * 255 / 31;
-    G = ((m_textColor >> 5) & 0x3F) * 255 / 63;
-    B = (m_textColor & 0x1F) * 255 / 31;
-    matrix_effect.setTextColor(R, G, B);
+void MatrixWidget::applyColors() {
+    static const uint16_t colors[][2] = {
+        {0, 0}, {0x0200, 0x07E0}, {0x4000, 0xF800}, {0x001F, 0x07FF},
+        {0x07FF, 0x001F}, {0x8010, 0xFC18}, {0xFD20, 0xFFE0},
+        {0xF800, 0xFD20}, {0xFC18, 0x8010}, {0x8410, 0xFFFF}
+    };
+    const uint16_t text = m_remotePreset == 0 ? m_textColor : colors[m_remotePreset][0];
+    const uint16_t head = m_remotePreset == 0 ? m_headTextColor : colors[m_remotePreset][1];
+    matrix_effect.setTextColor(((text >> 11) & 31) * 255 / 31, ((text >> 5) & 63) * 255 / 63, (text & 31) * 255 / 31);
+    matrix_effect.setHeadCharColor(((head >> 11) & 31) * 255 / 31, ((head >> 5) & 63) * 255 / 63, (head & 31) * 255 / 31);
+}
 
-    R = ((m_headTextColor >> 11) & 0x1F) * 255 / 31;
-    G = ((m_headTextColor >> 5) & 0x3F) * 255 / 63;
-    B = (m_headTextColor & 0x1F) * 255 / 31;
-    matrix_effect.setHeadCharColor(R, G, B);
+bool MatrixWidget::setColorPreset(uint8_t preset) {
+    if (preset > 9) return false;
+    m_remotePreset = preset;
+    applyColors();
+    draw(true);
+    return true;
 }
 
 void MatrixWidget::update(bool force) {
@@ -44,7 +47,9 @@ void MatrixWidget::update(bool force) {
 
 void MatrixWidget::draw(bool force) {
     m_manager.selectAllScreens();
-    matrix_effect.loop();
+    applyColors();
+    matrix_effect.loop(force);
+    m_manager.reset();
 }
 
 void MatrixWidget::buttonPressed(uint8_t buttonId, ButtonState state) {

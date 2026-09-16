@@ -1,6 +1,7 @@
 #include "5zonewidget/5ZoneWidget.h"
 #include "GlobalResources.h"
 #include "MainHelper.h"
+#include "IRRemote.h"
 #include "clockwidget/ClockWidget.h"
 #include "matrixwidget/MatrixWidget.h"
 #include "mqttwidget/MQTTWidget.h"
@@ -104,9 +105,32 @@ void setup() {
     addWidgets();
     config->setupWebPortal();
     MainHelper::resetCycleTimer();
+    setupRemote();
+}
+
+void checkRemote() {
+    const RemoteAction action = readRemote();
+    if (action == RemoteAction::None || !wifiWidget->isConnected() || !widgetSet->initialUpdateDone()) {
+        return;
+    }
+    if (action >= RemoteAction::Digit0 && action <= RemoteAction::Digit9) {
+        const uint8_t preset = static_cast<uint8_t>(action) - static_cast<uint8_t>(RemoteAction::Digit0);
+        if (widgetSet->getCurrent()->setColorPreset(preset)) {
+            MainHelper::resetCycleTimer();
+            Serial.printf("IR digit %u -> color preset\n", preset);
+        }
+        return;
+    }
+    switch (action) {
+        case RemoteAction::Previous: MainHelper::buttonPressed(BUTTON_LEFT, BTN_SHORT); break;
+        case RemoteAction::Next: MainHelper::buttonPressed(BUTTON_RIGHT, BTN_SHORT); break;
+        case RemoteAction::OK: MainHelper::buttonPressed(BUTTON_MIDDLE, BTN_SHORT); break;
+        default: break;
+    }
 }
 
 void loop() {
+    checkRemote();
     MainHelper::watchdogReset();
     if (wifiWidget->isConnected() == false) {
         wifiWidget->update();

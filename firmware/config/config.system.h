@@ -84,7 +84,7 @@
 // Maximum number of enabled widgets
 // The ESP might run out of memory if this is set too high
 #ifndef MAX_WIDGETS
-    #define MAX_WIDGETS 7
+    #define MAX_WIDGETS 10
 #endif
 
 #ifndef SCREEN_SIZE
@@ -155,10 +155,10 @@
     #define INCLUDE_5ZONE WIDGET_OFF
 #endif
 #ifndef INCLUDE_MATRIXSCREEN
-    #define INCLUDE_MATRIXSCREEN WIDGET_OFF
+    #define INCLUDE_MATRIXSCREEN WIDGET_ON
 #endif
 #ifndef INCLUDE_CUSTOM_IMAGE
-    #define INCLUDE_CUSTOM_IMAGE WIDGET_OFF
+    #define INCLUDE_CUSTOM_IMAGE WIDGET_ON
 #endif
 
 // CUSTOM IMAGE WIDGET SETTINGS
